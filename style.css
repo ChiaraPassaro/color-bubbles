@@ -1,0 +1,39 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.template-bubble{
+    display: none;
+}
+
+#canvas{
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    position: relative;
+    overflow: hidden;
+}
+.bubble__container{
+    position: absolute;
+    display: block;
+}
+.bubble{
+    border-radius: 100%;
+    opacity: 0.5;
+    position: relative;
+}
+
+.bubble .bubble{
+    position:absolute;
+}
+
+#change-color{
+    position: absolute;
+    top: 10;
+    left: 10;
+    color: #FFF;
+    z-index: 10000;
+    background: transparent;
+}
