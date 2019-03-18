@@ -15,7 +15,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@chiarapassaro/color-palettes-range": "^1.1.9"
+    "@chiarapassaro/color-palettes-range": "^1.1.9",
+    "gsap": "^2.1.2"
   },
   "devDependencies": {
     "laravel-mix": "^4.0.15",

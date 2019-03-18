@@ -1,29 +1,52 @@
-//Funzione che genera un numero random
+/*
+  Utilities Function
+*/
 function getRandom(min, max){
     var random = Math.floor(Math.random() * (max - min + 1)+ min);
     return random;
 }
-//Funzione che controlla se un numero è pari ritorna booleano
 function isEven(number) {
     var even = false;
-    var number = number;
-
-    if (number % 2 == 0){
+    if (number % 2 === 0){
         even = true;
     }
     return even;
 }
 
+
+/*
+Color Palettes Range
+*/
 var ColorPalettesRange = require("@chiarapassaro/color-palettes-range/src/js");
-var baseColor = new ColorPalettesRange.Hsl(getRandom(0,360), getRandom(0,70), getRandom(0,50));
+
+/*
+Gsap
+*/
+import {TweenMax, TimelineLite} from "gsap/all";
+
+
+/*
+Set Base Color and palettes
+*/
+var baseColor = new ColorPalettesRange.Hsl(getRandom(0,360), getRandom(10,70), getRandom(30,80));
 var palettes = new ColorPalettesRange.SetColorPalette(baseColor);
 var numberBubbles = getRandom(10,30);
+
+/*
+Save Palette RandomDominant
+*/
+
 var randomDominant;
 var bubbles = [];
-var intervalAnim;
+var timeLine = new TimelineLite;
 
+/*
+Start script
+*/
 $(document).ready(function () {
-    init(interval);
+    init();
+    
+    //change colors to do
     var $button = $('#change-color');
 
     $button.click(function () {
@@ -31,50 +54,27 @@ $(document).ready(function () {
         baseColor = new ColorPalettesRange.Hsl(getRandom(0,360), getRandom(0,100), getRandom(0,100));
         palettes.updateColorPalette(baseColor);
         randomDominant = palettes.randomDominant(numberBubbles, 20);
-        clearInterval(intervalAnim);
-
-        //fermo animazione
-        bubbles.forEach(function (element) {
-            element.children('.bubble').stop();
-        });
 
     });
 
 });
 
-function interval(bubbles, template, $canvas) {
-    console.log('interval');
-     var max = bubbles.length -1;
-        var rand = getRandom(0, max);
-        var $bubbleContainer = bubbles[rand];
-        $bubble = $bubbleContainer.children('.bubble');
 
-        $bubble.animate({
-                opacity: 0
-            },
-    {
-            duration: 3000,
-            complete: function() {
-                console.log("animate remove");
-                $bubble.stop();
-                $bubbleContainer.remove();
-                $bubbleContainer = createBubble(template, randomDominant, rand, $canvas);
-                bubbles[rand] = $bubbleContainer;
-                $canvas.append($bubbleContainer);
-            },
-        });
-}
-
-function init(callback) {
+/*
+Start creation bubbles and animation
+*/
+function init() {
     var $canvas = $('#canvas');
     var template = $('.template-bubble .bubble__container');
 
+/*
+    Bubbles must be even for Color Palettes Range
+*/
     if(!isEven(numberBubbles)){
         numberBubbles ++;
     }
 
     randomDominant = palettes.randomDominant(numberBubbles, 20);
-
 
     for (var i = 0; i < numberBubbles; i++){
         var $bubbleContainer = createBubble(template, randomDominant, i, $canvas);
@@ -82,14 +82,51 @@ function init(callback) {
         $canvas.append($bubbleContainer);
     }
 
-    //parte l'animazione solo quando sono tutte pronte
+/*
+    Save bubbles in array for tweenlite
+*/
+    var childrenContainer = [];
+
     bubbles.forEach(function (element) {
-        element.children('.bubble').dequeue("bubblequeue");
+        childrenContainer.push(element.children('.bubble'));
     });
 
-    intervalAnim = setInterval(callback, 3000, bubbles, template, $canvas);
+/*
+    Add animation to timeline
+*/
+    timeLine.add(
+        TweenLite.to(childrenContainer, 3, {
+            opacity: getRandom(0.5, 0.8),
+            zIndex: i,
+            onStart: function () {
+                console.log("start animation");
+            },
+            onComplete: function () {
+                console.log("complete animation");
+
+                /*Start animation on bubbles*/
+                bubbles.forEach(function (element, i) {
+                    timeLine.add(
+                        TweenLite.to(element, 5, {
+                            opacity: 0,
+                            zIndex: i,
+                            onComplete: function () {
+                                /*On complete remove this bubble and create new bubble*/
+                                removeCreateBubble(element, template, $canvas, i);
+                            }
+                        })
+                    );
+                });
+            }
+        }),
+
+    );
+
 }
 
+/*
+Create a bubble with random children bubbles
+*/
 function createBubble(template, arraycolors, i, $canvas) {
     var $bubbleContainer = template.clone();
     var $bubble = $bubbleContainer.children('.bubble');
@@ -102,12 +139,12 @@ function createBubble(template, arraycolors, i, $canvas) {
     $bubbleContainer.width(sizeContainer);
     $bubbleContainer.height(sizeContainer);
 
-    //console.log(arraycolors[i]);
     var thisColor = arraycolors[i].printHsl();
 
     $bubble.css('background-color', thisColor);
     $bubble.css('box-shadow', '0 0 30px ' + thisColor);
     $bubble.css('z-index', i);
+    $bubble.css('opacity', 0);
 
     $bubble.width(sizeBubble);
     $bubble.height(sizeBubble);
@@ -121,7 +158,6 @@ function createBubble(template, arraycolors, i, $canvas) {
     coordinates.push([top, left]);
     $bubbleContainer.offset({ top: top, left: left});
 
-    //creo altre bolle dentro il container
     var numberSubBubble = getRandom(2,20);
 
     for (var j = 0; j < numberSubBubble; j++) {
@@ -141,19 +177,44 @@ function createBubble(template, arraycolors, i, $canvas) {
 
         $bubble.append(newBubble);
 
-        $bubble.animate({
-            opacity: getRandom(0.3, 0.5), 'z-index': j
-            },
-            {
-                duration: 3000,
-                queue: 'bubblequeue',
-                complete: function() {
-                    console.log("animate");
-                    $canvas.append($bubbleContainer);
-                },
-            });
+        $canvas.append($bubbleContainer);
+
     }
 
     return $bubbleContainer;
 
+}
+
+/*
+Show new bubble animation
+*/
+function showBubble($bubble, template, $canvas, i) {
+    TweenLite.to($bubble, 3, {
+        opacity: getRandom(0.5, 0.8),
+        zIndex: i,
+        onStart: function () {
+            console.log("start show bubble");
+        },
+        onComplete: function () {
+            console.log("complete show bubble");
+            TweenLite.to($bubble, 3, { opacity: 0, zIndex: i, delay: 1, onComplete:
+                    function () {
+                        removeCreateBubble($bubble, template, $canvas, i);
+                    }
+            });
+        }
+    });
+}
+
+
+/*
+Remove and then create a bubble
+*/
+function removeCreateBubble($bubble, template, $canvas, i) {
+    $bubble.remove();
+    var $bubbleContainer = createBubble(template, randomDominant, getRandom(0, (bubbles.length - 1)), $canvas);
+    $bubble = $bubbleContainer.children('.bubble');
+    bubbles[i] = $bubbleContainer;
+    $canvas.append($bubbleContainer);
+    showBubble($bubble, template, $canvas, i);
 }
