@@ -1,4 +1,4 @@
-![Colored Bubbles](screen/screen.png)
+![Colored Bubbles](screen/screen2.png)
 
 # Generate random bubbles with random colors from Random Dominant Palette
 

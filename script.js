@@ -28,7 +28,7 @@ import {TweenMax, TimelineLite} from "gsap/all";
 /*
 Set Base Color and palettes
 */
-var baseColor = new ColorPalettesRange.Hsl(getRandom(0,360), getRandom(10,70), getRandom(30,80));
+var baseColor = new ColorPalettesRange.Hsl(getRandom(0,360), getRandom(50,70), getRandom(50,80));
 var palettes = new ColorPalettesRange.SetColorPalette(baseColor);
 var numberBubbles = getRandom(10,30);
 
@@ -140,9 +140,10 @@ function createBubble(template, arraycolors, i, $canvas) {
     $bubbleContainer.height(sizeContainer);
 
     var thisColor = arraycolors[i].printHsl();
+    var blurPrimary = getRandom(30, 60);
 
-    $bubble.css('background-color', thisColor);
-    $bubble.css('box-shadow', '0 0 30px ' + thisColor);
+    $bubble.css('background-color', 'transparent');
+    $bubble.css('box-shadow', 'inset 0 0 '+blurPrimary+'px ' + thisColor);
     $bubble.css('z-index', i);
     $bubble.css('opacity', 0);
 
@@ -168,9 +169,9 @@ function createBubble(template, arraycolors, i, $canvas) {
         newBubble.width(newBubbleSize);
         newBubble.height(newBubbleSize);
 
-        var blur = getRandom(30, 100);
-        newBubble.css('box-shadow', '0 0 ' + blur +'px ' + thisColor);
-        newBubble.css('background-color', thisColor);
+        var blur = getRandom(30, 60);
+        newBubble.css('box-shadow', 'inset 0 0 ' + blur +'px ' + thisColor);
+        $bubble.css('background-color', 'transparent');
         newBubble.css('z-index', -1);
 
         newBubble.offset({ top: getRandom(0, sizeContainer + newBubbleSize), left: getRandom(0, sizeContainer + newBubbleSize) });
