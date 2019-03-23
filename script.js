@@ -22,7 +22,7 @@ var ColorPalettesRange = require("@chiarapassaro/color-palettes-range/src/js");
 /*
 Gsap
 */
-import {TweenMax, TimelineLite} from "gsap/all";
+import {TweenLite} from "gsap/all";
 
 
 /*
@@ -38,34 +38,35 @@ Save Palette RandomDominant
 
 var randomDominant;
 var bubbles = [];
-var timeLine = new TimelineLite;
 
 /*
 Start script
 */
 $(document).ready(function () {
-    init();
-    
-    //change colors to do
-    var $button = $('#change-color');
+    var $hsl = $('#active-color .hsl');
+    var $buttonColor = $('#change-color');
 
-    $button.click(function () {
+    //Init Animation
+    init($hsl);
 
-        baseColor = new ColorPalettesRange.Hsl(getRandom(0,360), getRandom(0,100), getRandom(0,100));
+    $buttonColor.click(function () {
+        baseColor = new ColorPalettesRange.Hsl(getRandom(0,360), getRandom(50,70), getRandom(50,80));
+        $hsl.html(baseColor.printHsl());
+        $hsl.parent().css('background-color', baseColor.printHsl());
         palettes.updateColorPalette(baseColor);
         randomDominant = palettes.randomDominant(numberBubbles, 20);
-
     });
-
 });
 
 
 /*
 Start creation bubbles and animation
 */
-function init() {
+function init($hsl) {
     var $canvas = $('#canvas');
     var template = $('.template-bubble .bubble__container');
+    $hsl.parent().css('background-color', baseColor.printHsl());
+    $hsl.append(baseColor.printHsl());
 
 /*
     Bubbles must be even for Color Palettes Range
@@ -87,40 +88,11 @@ function init() {
 */
     var childrenContainer = [];
 
-    bubbles.forEach(function (element) {
+    bubbles.forEach(function (element, i) {
         childrenContainer.push(element.children('.bubble'));
+        showBubble(element, template, $canvas, i, 1, 0)
     });
 
-/*
-    Add animation to timeline
-*/
-    timeLine.add(
-        TweenLite.to(childrenContainer, 3, {
-            opacity: getRandom(0.5, 0.8),
-            zIndex: i,
-            onStart: function () {
-                console.log("start animation");
-            },
-            onComplete: function () {
-                console.log("complete animation");
-
-                /*Start animation on bubbles*/
-                bubbles.forEach(function (element, i) {
-                    timeLine.add(
-                        TweenLite.to(element, 5, {
-                            opacity: 0,
-                            zIndex: i,
-                            onComplete: function () {
-                                /*On complete remove this bubble and create new bubble*/
-                                removeCreateBubble(element, template, $canvas, i);
-                            }
-                        })
-                    );
-                });
-            }
-        }),
-
-    );
 
 }
 
@@ -189,16 +161,21 @@ function createBubble(template, arraycolors, i, $canvas) {
 /*
 Show new bubble animation
 */
-function showBubble($bubble, template, $canvas, i) {
-    TweenLite.to($bubble, 3, {
-        opacity: getRandom(0.5, 0.8),
+function showBubble($bubble, template, $canvas, i, duration, delay) {
+    TweenLite.to($bubble, duration, {
+        opacity: getRandom(0.6, 0.8),
         zIndex: i,
+        delay: delay,
+        ease: Power1.easeNone,
         onStart: function () {
-            console.log("start show bubble");
         },
         onComplete: function () {
-            console.log("complete show bubble");
-            TweenLite.to($bubble, 3, { opacity: 0, zIndex: i, delay: 1, onComplete:
+            TweenLite.to($bubble, 2, {
+                opacity: 0,
+                zIndex: i,
+                delay: delay,
+                ease: Power1.easeNone,
+                onComplete:
                     function () {
                         removeCreateBubble($bubble, template, $canvas, i);
                     }
@@ -214,8 +191,11 @@ Remove and then create a bubble
 function removeCreateBubble($bubble, template, $canvas, i) {
     $bubble.remove();
     var $bubbleContainer = createBubble(template, randomDominant, getRandom(0, (bubbles.length - 1)), $canvas);
+
     $bubble = $bubbleContainer.children('.bubble');
     bubbles[i] = $bubbleContainer;
     $canvas.append($bubbleContainer);
-    showBubble($bubble, template, $canvas, i);
+
+    //start new animation
+    showBubble($bubble, template, $canvas, i, 2, i+2);
 }

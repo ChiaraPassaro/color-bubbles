@@ -29,11 +29,27 @@
     position:absolute;
 }
 
-#change-color{
+.buttons{
     position: absolute;
-    top: 10;
-    left: 10;
+    top: 10px;
+    left: 10px;
     color: #FFF;
     z-index: 10000;
-    background: transparent;
+}
+
+.buttons button{
+    background: white;
+    padding: 5px;
+}
+
+#active-color{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10000;
+    width: 100px;
+    height: 100px;
+    padding: 10px;
+    color: #FFF;
+    box-shadow: 0 0 10px #FFFFFF;
 }
